@@ -13,6 +13,16 @@ export type RegisterAthleteFormState = {
   error?: string;
 };
 
+export type UpdateAthleteProfileFormState = {
+  success?: boolean;
+  error?: string;
+};
+
+export type CreatePersonalRecordFormState = {
+  success?: boolean;
+  error?: string;
+};
+
 export async function registerAthleteAccount(data: unknown) {
   try {
     const parsed = athleteAccountSchema.parse(data);

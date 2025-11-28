@@ -2,7 +2,10 @@
 
 import { useFormState } from "react-dom";
 import { useTransition } from "react";
-import { updateAthleteProfileAction } from "@/app/actions/athletes";
+import {
+  updateAthleteProfileAction,
+  type UpdateAthleteProfileFormState,
+} from "@/app/actions/athletes";
 import { countries } from "@/lib/data/countries";
 import type { Athlete, User } from "@prisma/client";
 
@@ -28,10 +31,13 @@ const genders = [
   { value: "F", label: "Femme" },
 ];
 
-const initialState = {};
+const initialState: UpdateAthleteProfileFormState = {};
 
 export function AthleteProfileForm({ athlete, user }: AthleteProfileFormProps) {
-  const [state, formAction] = useFormState(updateAthleteProfileAction, initialState);
+  const [state, formAction] = useFormState<
+    UpdateAthleteProfileFormState,
+    FormData
+  >(updateAthleteProfileAction, initialState);
   const [pending, startTransition] = useTransition();
 
   const handleAction = (formData: FormData) => {

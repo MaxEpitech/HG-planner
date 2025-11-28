@@ -2,7 +2,10 @@
 
 import { useFormState } from "react-dom";
 import { useTransition } from "react";
-import { createPersonalRecordAction } from "@/app/actions/athletes";
+import {
+  createPersonalRecordAction,
+  type CreatePersonalRecordFormState,
+} from "@/app/actions/athletes";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { getEventsForGender } from "@/lib/data/highland-games-events";
@@ -14,14 +17,17 @@ type PersonalRecordsFormProps = {
   onRecordAdded: () => void;
 };
 
-const initialState = {};
+const initialState: CreatePersonalRecordFormState = {};
 
 export function PersonalRecordsForm({
   records,
   athleteGender,
   onRecordAdded,
 }: PersonalRecordsFormProps) {
-  const [state, formAction] = useFormState(createPersonalRecordAction, initialState);
+  const [state, formAction] = useFormState<
+    CreatePersonalRecordFormState,
+    FormData
+  >(createPersonalRecordAction, initialState);
   const [pending, startTransition] = useTransition();
 
   const availableEvents = getEventsForGender(athleteGender);
