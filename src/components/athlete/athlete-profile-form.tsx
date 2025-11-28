@@ -92,7 +92,7 @@ export function AthleteProfileForm({ athlete, user }: AthleteProfileFormProps) {
             name="lastName"
             type="text"
             required
-            defaultValue={athlete?.lastName || user.name?.split(" ").slice(1).join(" ") || ""}
+            defaultValue={athlete?.lastName || user.lastName || ""}
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
           />
         </div>
