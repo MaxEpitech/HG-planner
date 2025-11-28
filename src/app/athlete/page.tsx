@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 import {
   getAthleteProfileForUser,
   getAthleteRegistrations,
@@ -18,6 +19,15 @@ export default async function AthleteDashboardPage() {
 
   if (session.user.role !== "ATHLETE") {
     redirect("/admin");
+  }
+
+  // Récupérer l'utilisateur complet depuis la base de données
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+  });
+
+  if (!user) {
+    redirect("/login");
   }
 
   const [profileResult, registrationsResult, resultsResult, recordsResult, personalRecordsResult] =
@@ -46,7 +56,7 @@ export default async function AthleteDashboardPage() {
       results={results}
       records={records}
       personalRecords={personalRecords}
-      user={session.user}
+      user={user}
     />
   );
 }
