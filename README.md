@@ -61,9 +61,93 @@ Assurez-vous que `NEXTAUTH_SECRET` est défini dans `.env.local`. Vous pouvez g�
 openssl rand -base64 32
 ```
 
+## Déploiement en production
+
+### Prérequis sur le serveur
+
+- Node.js 20.x ou supérieur
+- PostgreSQL
+- Nginx (optionnel, pour reverse proxy)
+- PM2 ou systemd (pour gérer le processus)
+
+### Étapes de déploiement
+
+1. **Cloner le dépôt sur le serveur :**
+   ```bash
+   git clone git@github.com:MaxEpitech/HG-planner.git
+   cd HG-planner
+   ```
+
+2. **Configurer les variables d'environnement :**
+   ```bash
+   cp env.example .env.local
+   nano .env.local  # Éditer avec vos valeurs
+   ```
+   
+   Variables importantes :
+   - `DATABASE_URL` : URL de connexion PostgreSQL
+   - `NEXTAUTH_SECRET` : Clé secrète (générer avec `openssl rand -base64 32`)
+   - `NEXTAUTH_URL` : URL publique de votre application (ex: `https://votre-domaine.com`)
+   - `PORT` : Port d'écoute (par défaut 3000)
+
+3. **Déployer l'application :**
+   ```bash
+   chmod +x deploy.sh
+   ./deploy.sh
+   ```
+
+4. **Démarrer l'application :**
+
+   **Option A - Avec PM2 (recommandé) :**
+   ```bash
+   npm install -g pm2
+   pm2 start ecosystem.config.js
+   pm2 save
+   pm2 startup  # Pour démarrer au boot
+   ```
+
+   **Option B - Avec systemd :**
+   ```bash
+   sudo cp hg-europe.service.example /etc/systemd/system/hg-europe.service
+   sudo nano /etc/systemd/system/hg-europe.service  # Ajuster les chemins
+   sudo systemctl daemon-reload
+   sudo systemctl enable hg-europe
+   sudo systemctl start hg-europe
+   ```
+
+5. **Configurer Nginx (reverse proxy) :**
+   ```bash
+   sudo cp nginx.conf.example /etc/nginx/sites-available/hg-europe
+   sudo nano /etc/nginx/sites-available/hg-europe  # Ajuster le domaine
+   sudo ln -s /etc/nginx/sites-available/hg-europe /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
+6. **Configurer SSL avec Let's Encrypt (optionnel mais recommandé) :**
+   ```bash
+   sudo apt install certbot python3-certbot-nginx
+   sudo certbot --nginx -d votre-domaine.com
+   ```
+
+### Commandes utiles en production
+
+- **Voir les logs PM2 :** `pm2 logs hg-europe`
+- **Redémarrer l'app :** `pm2 restart hg-europe`
+- **Voir le statut systemd :** `sudo systemctl status hg-europe`
+- **Voir les logs systemd :** `sudo journalctl -u hg-europe -f`
+
+### Mise à jour de l'application
+
+```bash
+git pull origin main
+./deploy.sh
+pm2 restart hg-europe  # ou systemctl restart hg-europe
+```
+
 ## Prochaines étapes
 
 1. ✅ Brancher NextAuth (credentials) + sécuriser les layouts admin
 2. Construire les API routes / server actions pour créer compétitions & groupes
-3. Ouvrir le portail public d’inscription et relier les validations côté admin
+3. Ouvrir le portail public d'inscription et relier les validations côté admin
 4. Implémenter la saisie de résultats et le calcul automatique des points

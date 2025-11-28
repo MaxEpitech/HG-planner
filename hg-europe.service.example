@@ -1,0 +1,35 @@
+# Service systemd pour Highland Games
+# Placez ce fichier dans /etc/systemd/system/hg-europe.service
+# Puis:
+#   systemctl daemon-reload
+#   systemctl enable hg-europe
+#   systemctl start hg-europe
+#   systemctl status hg-europe
+
+[Unit]
+Description=Highland Games - Application Next.js
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/hg-europe
+Environment=NODE_ENV=production
+EnvironmentFile=/var/www/hg-europe/.env.local
+ExecStart=/usr/bin/node /var/www/hg-europe/server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hg-europe
+
+# Sécurité
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/hg-europe
+
+[Install]
+WantedBy=multi-user.target
+

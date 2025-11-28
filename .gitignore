@@ -30,6 +30,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# PM2 logs
+logs/
+*.log
+.pm2/
+
 # env files (can opt-in for committing if needed)
 .env*
 

@@ -1,4 +1,4 @@
-// Point d'entrée pour Plesk
+// Point d'entrée pour le serveur de production
 // Ce fichier démarre l'application Next.js en mode production
 
 const { createServer } = require('http');
