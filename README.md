@@ -63,6 +63,8 @@ openssl rand -base64 32
 
 ## Déploiement en production
 
+> 📖 **Guide détaillé** : Consultez [DEPLOYMENT.md](./DEPLOYMENT.md) pour un guide complet sur le lancement en arrière-plan.
+
 ### Prérequis sur le serveur
 
 - Node.js 20.x ou supérieur
