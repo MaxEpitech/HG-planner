@@ -1,0 +1,59 @@
+# Configuration Apache2 pour Highland Games
+# Placez ce fichier dans /etc/apache2/sites-available/hg-europe.conf
+# Puis activez-le avec: sudo a2ensite hg-europe.conf
+# Rechargez Apache: sudo systemctl reload apache2
+
+<VirtualHost *:80>
+    ServerName votre-domaine.com
+    ServerAlias www.votre-domaine.com
+
+    # Redirection HTTPS (décommentez après avoir configuré SSL)
+    # Redirect permanent / https://votre-domaine.com/
+
+    # Pour HTTPS, créez un autre VirtualHost sur le port 443
+    # et décommentez les lignes SSL ci-dessous
+    # <VirtualHost *:443>
+    #     ServerName votre-domaine.com
+    #     ServerAlias www.votre-domaine.com
+    #     
+    #     SSLEngine on
+    #     SSLCertificateFile /etc/letsencrypt/live/votre-domaine.com/fullchain.pem
+    #     SSLCertificateKeyFile /etc/letsencrypt/live/votre-domaine.com/privkey.pem
+
+    # Logs
+    ErrorLog ${APACHE_LOG_DIR}/hg-europe-error.log
+    CustomLog ${APACHE_LOG_DIR}/hg-europe-access.log combined
+
+    # Proxy vers l'application Next.js
+    ProxyPreserveHost On
+    
+    # Headers pour le proxy
+    RequestHeader set X-Real-IP %{REMOTE_ADDR}s
+    RequestHeader set X-Forwarded-For %{REMOTE_ADDR}s
+    RequestHeader set X-Forwarded-Proto "http"
+    RequestHeader set X-Forwarded-Port "80"
+
+    # Pour HTTPS, utilisez:
+    # RequestHeader set X-Forwarded-Proto "https"
+    # RequestHeader set X-Forwarded-Port "443"
+
+    # Proxy pour les requêtes HTTP normales
+    ProxyPass / http://localhost:3000/
+    ProxyPassReverse / http://localhost:3000/
+
+    # Support des WebSockets (si nécessaire)
+    # ProxyPass /ws ws://localhost:3000/ws
+    # ProxyPassReverse /ws ws://localhost:3000/ws
+
+    # Timeouts pour les requêtes longues
+    ProxyTimeout 60
+
+    # Taille maximale des uploads (10MB)
+    LimitRequestBody 10485760
+
+    # Headers de sécurité (optionnel mais recommandé)
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</VirtualHost>
+

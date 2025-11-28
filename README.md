@@ -67,7 +67,7 @@ openssl rand -base64 32
 
 - Node.js 20.x ou supérieur
 - PostgreSQL
-- Nginx (optionnel, pour reverse proxy)
+- Apache2 (optionnel, pour reverse proxy)
 - PM2 ou systemd (pour gérer le processus)
 
 ### Étapes de déploiement
@@ -115,19 +115,37 @@ openssl rand -base64 32
    sudo systemctl start hg-europe
    ```
 
-5. **Configurer Nginx (reverse proxy) :**
+5. **Configurer Apache2 (reverse proxy) :**
+   
+   **Activer les modules nécessaires :**
    ```bash
-   sudo cp nginx.conf.example /etc/nginx/sites-available/hg-europe
-   sudo nano /etc/nginx/sites-available/hg-europe  # Ajuster le domaine
-   sudo ln -s /etc/nginx/sites-available/hg-europe /etc/nginx/sites-enabled/
-   sudo nginx -t
-   sudo systemctl reload nginx
+   sudo a2enmod proxy
+   sudo a2enmod proxy_http
+   sudo a2enmod proxy_wstunnel
+   sudo a2enmod headers
+   sudo a2enmod rewrite
+   sudo systemctl restart apache2
+   ```
+   
+   **Configurer le VirtualHost :**
+   ```bash
+   sudo cp apache2.conf.example /etc/apache2/sites-available/hg-europe.conf
+   sudo nano /etc/apache2/sites-available/hg-europe.conf  # Ajuster le domaine
+   sudo a2ensite hg-europe.conf
+   sudo apache2ctl configtest
+   sudo systemctl reload apache2
+   ```
+
+   **Alternative avec .htaccess (moins recommandé) :**
+   ```bash
+   cp .htaccess.example .htaccess
+   nano .htaccess  # Ajuster si nécessaire
    ```
 
 6. **Configurer SSL avec Let's Encrypt (optionnel mais recommandé) :**
    ```bash
-   sudo apt install certbot python3-certbot-nginx
-   sudo certbot --nginx -d votre-domaine.com
+   sudo apt install certbot python3-certbot-apache
+   sudo certbot --apache -d votre-domaine.com
    ```
 
 ### Commandes utiles en production
