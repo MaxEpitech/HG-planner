@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GlobalRole {
+  PLATFORM_ADMIN
+  ORGANISATEUR
+  DIRECTEUR_ATHLETIQUE
+  ATHLETE
+}
+
+enum CompetitionRole {
+  ORGANISATEUR
+  DIRECTEUR_ATHLETIQUE
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id               String                 @id @default(cuid())
+  email            String                 @unique
+  passwordHash     String?
+  firstName        String
+  lastName         String
+  organizationName String?
+  role             GlobalRole             @default(ORGANISATEUR)
+  isApproved       Boolean                @default(false)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  accounts         Account[]              @relation("UserAccounts")
+  sessions         Session[]              @relation("UserSessions")
+  competitions     Competition[]          @relation("CompetitionOwner")
+  permissions      CompetitionPermission[]
+  athletes         Athlete[]              @relation("Coach")
+  athleteProfile   Athlete?              @relation("AthleteAccount")
+}
+
+model Competition {
+  id           String                  @id @default(cuid())
+  name         String
+  description  String?
+  location     String
+  startDate    DateTime
+  endDate      DateTime
+  status       String                  @default("draft")
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  ownerId      String
+  owner        User                    @relation("CompetitionOwner", fields: [ownerId], references: [id])
+  groups       Group[]
+  permissions  CompetitionPermission[]
+}
+
+model CompetitionPermission {
+  id             String           @id @default(cuid())
+  role           CompetitionRole
+  userId         String
+  competitionId  String
+  createdAt      DateTime         @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  competition Competition  @relation(fields: [competitionId], references: [id])
+
+  @@unique([userId, competitionId, role])
+}
+
+model Group {
+  id              String         @id @default(cuid())
+  name            String
+  category        String
+  maxAthletes     Int
+  competitionId   String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  competition   Competition  @relation(fields: [competitionId], references: [id])
+  events        Event[]
+  registrations Registration[]
+}
+
+model Event {
+  id        String    @id @default(cuid())
+  name      String
+  order     Int
+  groupId   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  group   Group      @relation(fields: [groupId], references: [id])
+  results Result[]
+}
+
+model Athlete {
+  id           String        @id @default(cuid())
+  firstName    String
+  lastName     String
+  club         String?
+  email        String?
+  phone        String?
+  birthDate    DateTime?
+  country      String?
+  tshirtSize   String?
+  gender       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  coachId      String?
+  userId       String?       @unique
+
+  registrations   Registration[]
+  results         Result[]
+  personalRecords PersonalRecord[]
+  coach           User?         @relation("Coach", fields: [coachId], references: [id])
+  account         User?         @relation("AthleteAccount", fields: [userId], references: [id])
+}
+
+model Registration {
+  id         String             @id @default(cuid())
+  status     RegistrationStatus @default(PENDING)
+  athleteId  String
+  groupId    String
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id])
+  group   Group   @relation(fields: [groupId], references: [id])
+
+  @@unique([athleteId, groupId])
+}
+
+model Result {
+  id         String   @id @default(cuid())
+  performance String?
+  rank       Int
+  points     Int
+  eventId    String
+  athleteId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  event    Event   @relation(fields: [eventId], references: [id])
+  athlete  Athlete @relation(fields: [athleteId], references: [id])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation("UserAccounts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation("UserSessions", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PersonalRecord {
+  id          String   @id @default(cuid())
+  eventName   String
+  performance String
+  date        DateTime?
+  notes       String?
+  athleteId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([athleteId])
+}
+

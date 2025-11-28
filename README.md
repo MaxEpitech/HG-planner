@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Highland Games – Gestion des inscriptions et résultats
 
-## Getting Started
+Application Next.js 16 (App Router + Tailwind v4) dédiée aux compétitions de Highland Games (Luzarches et autres organisateurs). Elle couvre :
 
-First, run the development server:
+- Création d’événements, groupes et épreuves par l’organisateur
+- Attribution de rôles `Organisateur` et `Directeur Athlétique`
+- Inscriptions des athlètes (sans paiement en ligne)
+- Saisie des résultats avec système de points inversé (1er = 1 point)
+
+## Stack
+
+- Next.js 16 / React 19
+- Tailwind CSS v4
+- Prisma + PostgreSQL
+- NextAuth (email/password ou providers à définir)
+- TypeScript + ESLint
+
+## Démarrage
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp env.example .env.local   # renseigner DATABASE_URL, NEXTAUTH_SECRET
+npm install
+npm run db:push             # applique le schéma Prisma sur votre base
+npm run dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Commandes utiles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run prisma:generate` – régénère le client Prisma
+- `npm run prisma:studio` – ouvre Prisma Studio pour inspecter les données
+- `npm run lint` – vérifie la qualité du code
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure actuelle
 
-## Learn More
+- `src/app/page.tsx` – landing de présentation et roadmap
+- `src/app/admin/*` – gabarits du back-office (tableau de bord, compétitions, athlètes, résultats)
+- `prisma/schema.prisma` – modèle de données (users, permissions, compétitions, groupes, épreuves, inscriptions, résultats)
+- `src/lib/prisma.ts` – client Prisma partagé
+- `src/lib/auth/roles.ts` – utilitaires de rôles/permissions
 
-To learn more about Next.js, take a look at the following resources:
+## Authentification
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+L'application utilise NextAuth avec authentification par email/mot de passe.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Créer des utilisateurs de test
 
-## Deploy on Vercel
+```bash
+npm run db:seed
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Cela crée 3 comptes de test :
+- `organisateur@test.com` / `admin123` (rôle Organisateur)
+- `directeur@test.com` / `admin123` (rôle Directeur Athlétique)
+- `admin@test.com` / `admin123` (rôle Admin plateforme)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Configuration
+
+Assurez-vous que `NEXTAUTH_SECRET` est défini dans `.env.local`. Vous pouvez générer une clé avec :
+
+```bash
+openssl rand -base64 32
+```
+
+## Prochaines étapes
+
+1. ✅ Brancher NextAuth (credentials) + sécuriser les layouts admin
+2. Construire les API routes / server actions pour créer compétitions & groupes
+3. Ouvrir le portail public d’inscription et relier les validations côté admin
+4. Implémenter la saisie de résultats et le calcul automatique des points

@@ -1,63 +1,153 @@
-import Image from "next/image";
+import Link from "next/link";
+import { HeroSection } from "@/components/public/hero-section";
+import { FeatureGrid } from "@/components/public/feature-grid";
+import { TopNav } from "@/components/public/top-nav";
+import { UpcomingCompetitionsSection } from "@/components/public/upcoming-competitions";
+import { OrganizerHighlights } from "@/components/public/organizer-highlights";
+import { getPublicStats } from "@/app/actions/public-stats";
+import { getPublicCompetitions } from "@/app/actions/registrations";
 
-export default function Home() {
+const athleteFeatures = [
+  {
+    title: "Parcours d'inscription clair",
+    description:
+      "Choix des groupes, suivi du statut, confirmations en temps réel.",
+    badge: "Athlètes",
+  },
+  {
+    title: "Profil complet",
+    description: "Club, catégorie, records : toutes vos infos centralisées.",
+  },
+  {
+    title: "Résultats publics",
+    description: "Classements mis à jour après chaque épreuve.",
+  },
+];
+
+export default async function Home() {
+  const [statsResult, competitionsResult] = await Promise.all([
+    getPublicStats(),
+    getPublicCompetitions(),
+  ]);
+
+  const heroStats =
+    statsResult.success && statsResult.data
+      ? statsResult.data
+      : {
+          totalCompetitions: 0,
+          activeCompetitions: 0,
+          totalResults: 0,
+          totalAthletes: 0,
+        };
+
+  const now = new Date();
+  const upcomingCompetitions =
+    competitionsResult.success && competitionsResult.data
+      ? competitionsResult.data
+          .filter((competition) => new Date(competition.startDate) >= now)
+          .sort(
+            (a, b) =>
+              new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          )
+          .slice(0, 3)
+          .map((competition) => {
+            const totalSpots = competition.groups.reduce(
+              (sum, group) => sum + group.maxAthletes,
+              0
+            );
+            const registrations = competition.groups.reduce(
+              (sum, group) => sum + group._count.registrations,
+              0
+            );
+
+            return {
+              id: competition.id,
+              name: competition.name,
+              location: competition.location,
+              startDate: new Date(competition.startDate),
+              remainingSpots: Math.max(0, totalSpots - registrations),
+              totalSpots,
+            };
+          })
+      : [];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ecfccb,_#ecfdf5,_#f8fafc)] text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+      <TopNav />
+      <main className="">
+        <HeroSection stats={heroStats} />
+
+        <div className="mx-auto flex flex-col gap-16 px-6 py-16">
+          <div className="mx-auto max-w-6xl">
+            <UpcomingCompetitionsSection competitions={upcomingCompetitions} />
+
+            <FeatureGrid
+              title="Pour les athlètes & le public"
+              features={athleteFeatures}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+            <OrganizerHighlights />
+
+            <section className="mt-6 rounded-[32px] border border-zinc-200 bg-white p-8 text-center shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-600">
+                Vous êtes athlète ?
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold">
+                Créez votre compte et suivez vos compétitions
+              </h2>
+              <p className="mt-2 text-sm text-zinc-500">
+                Inscrivez-vous rapidement, consultez vos résultats et vos
+                records en temps réel.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-4">
+                <Link
+                  href="/athlete/inscription"
+                  className="rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                >
+                  Créer mon compte athlète
+                </Link>
+                <Link
+                  href="/login"
+                  className="rounded-full border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-white dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                >
+                  Se connecter
+                </Link>
+              </div>
+            </section>
+
+            <section className="mt-6 rounded-[32px] border border-zinc-200 bg-white p-8 text-center shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-600">
+                Organisateur
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold">
+                Lancez votre prochaine compétition en quelques minutes.
+              </h2>
+              <p className="mt-2 text-sm text-zinc-500">
+                Configurez vos groupes, envoyez vos invitations et partagez les
+                résultats en direct.
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-4">
+                <Link
+                  href="/admin"
+                  className="rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                >
+                  Accéder à l&apos;interface organisateur
+                </Link>
+                <Link
+                  href="/inscriptions"
+                  className="rounded-full border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-white dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                >
+                  Préparer les inscriptions
+                </Link>
+                <Link
+                  href="/resultats"
+                  className="rounded-full border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-white dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                >
+                  Voir les résultats
+                </Link>
+              </div>
+            </section>
+          </div>
         </div>
       </main>
     </div>

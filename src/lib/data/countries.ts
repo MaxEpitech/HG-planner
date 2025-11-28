@@ -1,0 +1,61 @@
+// Liste des pays en français (ISO 3166-1 alpha-2)
+export const countries = [
+  { code: "FR", name: "France" },
+  { code: "BE", name: "Belgique" },
+  { code: "CH", name: "Suisse" },
+  { code: "LU", name: "Luxembourg" },
+  { code: "MC", name: "Monaco" },
+  { code: "AD", name: "Andorre" },
+  { code: "GB", name: "Royaume-Uni" },
+  { code: "IE", name: "Irlande" },
+  { code: "ES", name: "Espagne" },
+  { code: "PT", name: "Portugal" },
+  { code: "IT", name: "Italie" },
+  { code: "DE", name: "Allemagne" },
+  { code: "AT", name: "Autriche" },
+  { code: "NL", name: "Pays-Bas" },
+  { code: "DK", name: "Danemark" },
+  { code: "SE", name: "Suède" },
+  { code: "NO", name: "Norvège" },
+  { code: "FI", name: "Finlande" },
+  { code: "PL", name: "Pologne" },
+  { code: "CZ", name: "République tchèque" },
+  { code: "SK", name: "Slovaquie" },
+  { code: "HU", name: "Hongrie" },
+  { code: "RO", name: "Roumanie" },
+  { code: "BG", name: "Bulgarie" },
+  { code: "GR", name: "Grèce" },
+  { code: "US", name: "États-Unis" },
+  { code: "CA", name: "Canada" },
+  { code: "AU", name: "Australie" },
+  { code: "NZ", name: "Nouvelle-Zélande" },
+  { code: "ZA", name: "Afrique du Sud" },
+  { code: "BR", name: "Brésil" },
+  { code: "AR", name: "Argentine" },
+  { code: "MX", name: "Mexique" },
+  { code: "JP", name: "Japon" },
+  { code: "CN", name: "Chine" },
+  { code: "IN", name: "Inde" },
+  { code: "RU", name: "Russie" },
+  { code: "TR", name: "Turquie" },
+  { code: "EG", name: "Égypte" },
+  { code: "MA", name: "Maroc" },
+  { code: "TN", name: "Tunisie" },
+  { code: "DZ", name: "Algérie" },
+  { code: "SN", name: "Sénégal" },
+  { code: "CI", name: "Côte d'Ivoire" },
+  { code: "CM", name: "Cameroun" },
+  { code: "CD", name: "République démocratique du Congo" },
+  { code: "KE", name: "Kenya" },
+  { code: "ET", name: "Éthiopie" },
+  { code: "NG", name: "Nigeria" },
+  { code: "GH", name: "Ghana" },
+].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+
+// Fonction pour obtenir le nom du pays à partir du code
+export function getCountryName(code: string | null | undefined): string {
+  if (!code) return "";
+  const country = countries.find((c) => c.code === code);
+  return country?.name || code;
+}
+
