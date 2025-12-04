@@ -6,11 +6,18 @@ const { parse } = require('url');
 const next = require('next');
 
 // Charger les variables d'environnement
-require('dotenv').config({ path: '.env.local' });
+// Plesk utilise les variables d'environnement définies dans l'interface
+// On essaie d'abord .env.local, puis on utilise les variables système
+try {
+  require('dotenv').config({ path: '.env.local' });
+} catch (e) {
+  // Si .env.local n'existe pas, utiliser les variables d'environnement système (Plesk)
+  console.log('Using system environment variables (Plesk)');
+}
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || 'localhost';
-const port = process.env.PORT || 3000;
+const port = parseInt(process.env.PORT || '3000', 10);
 
 // Initialiser Next.js
 const app = next({ dev, hostname, port });

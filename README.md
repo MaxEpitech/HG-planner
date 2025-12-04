@@ -63,7 +63,9 @@ openssl rand -base64 32
 
 ## Déploiement en production
 
-> 📖 **Guide détaillé** : Consultez [DEPLOYMENT.md](./DEPLOYMENT.md) pour un guide complet sur le lancement en arrière-plan.
+> 📖 **Guide détaillé** : 
+> - **Déploiement général** : Consultez [DEPLOYMENT.md](./DEPLOYMENT.md) pour un guide complet sur le lancement en arrière-plan
+> - **Déploiement sur Plesk** : Consultez [PLESK_DEPLOYMENT.md](./PLESK_DEPLOYMENT.md) si vous utilisez Plesk
 
 ### Prérequis sur le serveur
 
