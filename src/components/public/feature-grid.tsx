@@ -1,3 +1,8 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
 type Feature = {
   title: string;
   description: string;
@@ -12,33 +17,45 @@ type FeatureGridProps = {
 
 export function FeatureGrid({ title, subtitle, features }: FeatureGridProps) {
   return (
-    <section className="mt-6 space-y-4 rounded-[32px] border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-emerald-600">
+    <section className="mt-16 space-y-8">
+      <div className="text-center max-w-2xl mx-auto">
+        <span className="inline-block rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 mb-3">
           {title}
-        </p>
-        {subtitle ? (
-          <p className="text-sm text-zinc-500">{subtitle}</p>
-        ) : null}
+        </span>
+        {subtitle && (
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            {subtitle}
+          </h2>
+        )}
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        {features.map((feature) => (
-          <article
+      
+      <div className="grid gap-6 md:grid-cols-3">
+        {features.map((feature, i) => (
+          <motion.div
             key={feature.title}
-            className="rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
           >
-            {feature.badge ? (
-              <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-                {feature.badge}
-              </span>
-            ) : null}
-            <h3 className="mt-3 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-              {feature.title}
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {feature.description}
-            </p>
-          </article>
+            <Card className="h-full border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition-colors shadow-sm hover:shadow-md bg-white dark:bg-slate-900/80">
+                <CardHeader className="pb-2">
+                    {feature.badge && (
+                        <div className="mb-2">
+                            <span className="inline-flex items-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                                {feature.badge}
+                            </span>
+                        </div>
+                    )}
+                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                        {feature.description}
+                    </p>
+                </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
     </section>

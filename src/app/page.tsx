@@ -6,6 +6,8 @@ import { UpcomingCompetitionsSection } from "@/components/public/upcoming-compet
 import { OrganizerHighlights } from "@/components/public/organizer-highlights";
 import { getPublicStats } from "@/app/actions/public-stats";
 import { getPublicCompetitions } from "@/app/actions/registrations";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 const athleteFeatures = [
   {
@@ -72,13 +74,12 @@ export default async function Home() {
       : [];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#ecfccb,_#ecfdf5,_#f8fafc)] text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+    <div className="min-h-screen bg-transparent text-foreground">
       <TopNav />
-      <main className="">
+      <main>
         <HeroSection stats={heroStats} />
 
-        <div className="mx-auto flex flex-col gap-16 px-6 py-16">
-          <div className="mx-auto max-w-6xl">
+        <div className="mx-auto flex flex-col gap-24 px-6 py-24 max-w-7xl">
             <UpcomingCompetitionsSection competitions={upcomingCompetitions} />
 
             <FeatureGrid
@@ -88,66 +89,63 @@ export default async function Home() {
 
             <OrganizerHighlights />
 
-            <section className="mt-6 rounded-[32px] border border-zinc-200 bg-white p-8 text-center shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-600">
-                Vous êtes athlète ?
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold">
-                Créez votre compte et suivez vos compétitions
-              </h2>
-              <p className="mt-2 text-sm text-zinc-500">
-                Inscrivez-vous rapidement, consultez vos résultats et vos
-                records en temps réel.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-4">
-                <Link
-                  href="/athlete/inscription"
-                  className="rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                >
-                  Créer mon compte athlète
-                </Link>
-                <Link
-                  href="/login"
-                  className="rounded-full border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-white dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                >
-                  Se connecter
-                </Link>
-              </div>
-            </section>
+            <div className="grid gap-8 md:grid-cols-2 lg:gap-12 text-center">
+                <Card className="relative overflow-hidden border-emerald-100 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-slate-950">
+                    <CardContent className="p-10 flex flex-col items-center justify-center h-full space-y-6">
+                         <div className="space-y-2">
+                             <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 font-bold">
+                                Vous êtes athlète ?
+                            </p>
+                            <h2 className="text-3xl font-bold tracking-tight">
+                                Rejoignez la compétition
+                            </h2>
+                            <p className="text-muted-foreground max-w-sm mx-auto">
+                                Inscrivez-vous, suivez vos performances et accédez à vos records en un clic.
+                            </p>
+                         </div>
+                         <div className="flex flex-wrap justify-center gap-4">
+                            <Button asChild size="lg" className="rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                <Link href="/athlete/inscription">
+                                    Créer mon compte
+                                </Link>
+                            </Button>
+                            <Button asChild variant="outline" size="lg" className="rounded-full">
+                                <Link href="/login">
+                                    Se connecter
+                                </Link>
+                            </Button>
+                         </div>
+                    </CardContent>
+                </Card>
 
-            <section className="mt-6 rounded-[32px] border border-zinc-200 bg-white p-8 text-center shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-600">
-                Organisateur
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold">
-                Lancez votre prochaine compétition en quelques minutes.
-              </h2>
-              <p className="mt-2 text-sm text-zinc-500">
-                Configurez vos groupes, envoyez vos invitations et partagez les
-                résultats en direct.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-4">
-                <Link
-                  href="/admin"
-                  className="rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                >
-                  Accéder à l&apos;interface organisateur
-                </Link>
-                <Link
-                  href="/inscriptions"
-                  className="rounded-full border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-white dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                >
-                  Préparer les inscriptions
-                </Link>
-                <Link
-                  href="/resultats"
-                  className="rounded-full border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-white dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                >
-                  Voir les résultats
-                </Link>
-              </div>
-            </section>
-          </div>
+                <Card className="relative overflow-hidden border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+                    <CardContent className="p-10 flex flex-col items-center justify-center h-full space-y-6">
+                         <div className="space-y-2">
+                             <p className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">
+                                Organisateur
+                            </p>
+                            <h2 className="text-3xl font-bold tracking-tight">
+                                Gérez vos événements
+                            </h2>
+                            <p className="text-muted-foreground max-w-sm mx-auto">
+                                Une suite d&apos;outils complète pour vos Highland Games : inscriptions, groupes, résultats.
+                            </p>
+                         </div>
+                         <div className="flex flex-wrap justify-center gap-4">
+                            <Button asChild size="lg" className="rounded-full bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">
+                                <Link href="/admin">
+                                    Interface organisateur
+                                </Link>
+                            </Button>
+                            <Button asChild variant="outline" size="lg" className="rounded-full">
+                                <Link href="/inscriptions">
+                                    Inscriptions
+                                </Link>
+                            </Button>
+                         </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       </main>
     </div>

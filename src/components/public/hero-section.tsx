@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 type HeroStats = {
   totalCompetitions: number;
@@ -15,6 +17,21 @@ type HeroSectionProps = {
 
 const formatter = new Intl.NumberFormat("fr-FR");
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
 export function HeroSection({ stats }: HeroSectionProps) {
   const competitionsCount = formatter.format(stats.totalCompetitions ?? 0);
   const athleteCount = formatter.format(
@@ -23,58 +40,105 @@ export function HeroSection({ stats }: HeroSectionProps) {
   const resultsCount = formatter.format(stats.totalResults ?? 0);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white.shadow-2xl">
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-emerald-400 blur-[180px]" />
-        <div className="absolute right-[-10%] top-[-20%] h-80 w-80 rounded-full bg-cyan-400 blur-[200px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),_transparent)]" />
+    <section className="relative overflow-hidden bg-slate-900 text-white pb-20 pt-24 lg:pt-32">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute -left-32 top-[-10%] h-[500px] w-[500px] rounded-full bg-emerald-500/20 blur-[120px]" />
+        <div className="absolute right-[-10%] top-[20%] h-[600px] w-[600px] rounded-full bg-blue-600/20 blur-[140px]" />
+        <div className="absolute bottom-[-20%] left-[20%] h-[400px] w-[400px] rounded-full bg-indigo-500/20 blur-[130px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_70%)]" />
       </div>
 
-      <div className="relative mx-auto grid max-w-6xl gap-10 px-8 py-20 lg:grid-cols-[3fr,2fr] lg:items-center">
-        <div className="space-y-6">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">
-            Highland Games            <span className="h-1 w-1 rounded-full bg-emerald-200" />
-            Europe
-          </span>
-          <h1 className="text-5xl font-semibold leading-tight text-white">
-            La plateforme officielle pour gérer vos Highland Games en Europe.
-          </h1>
-          <p className="text-lg text-slate-200">
-            Inscriptions, configuration des groupes, gestion des rôles et publication des résultats
-            en temps réel. Une seule interface pour vos équipes terrain et votre public.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Link
-              href="/admin"
-              className="rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-emerald-300"
-            >
-              Espace organisateur
-            </Link>
-            <Link
-              href="/resultats"
-              className="rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Calendrier & résultats
-            </Link>
-          </div>
+      <motion.div 
+        className="relative z-10 mx-auto grid max-w-6xl gap-12 px-8 lg:grid-cols-[1.5fr,1fr] lg:items-center"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="space-y-8">
+          <motion.div variants={itemVariants}>
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 border border-emerald-500/20 backdrop-blur-sm shadow-inner shadow-emerald-500/10">
+              Highland Games
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              Europe
+            </span>
+          </motion.div>
+          
+          <motion.h1 
+            className="text-5xl font-bold leading-tight tracking-tight text-white lg:text-6xl" // Updated typography
+            variants={itemVariants}
+          >
+            La référence <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Highland Games</span> en Europe.
+          </motion.h1>
+          
+          <motion.p 
+            className="text-lg text-slate-300 max-w-xl leading-relaxed"
+            variants={itemVariants}
+          >
+            Inscriptions, gestion des groupes, résultats en direct.
+            <br />
+            Une expérience premium pour organisateurs et athlètes.
+          </motion.p>
+          
+          <motion.div className="flex flex-wrap gap-4" variants={itemVariants}>
+            <Button asChild size="lg" className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold text-base shadow-emerald-500/25 shadow-lg relative overflow-hidden group">
+              <Link href="/admin">
+                <span className="relative z-10">Espace Organisateur</span>
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              </Link>
+            </Button>
+            <Button asChild variant="glass" size="lg" className="rounded-full text-base font-medium">
+               <Link href="/resultats">
+                 Consulter les résultats
+               </Link>
+            </Button>
+          </motion.div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur ">
-          <div className="rounded-2xl border border-white/10 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-cyan-200">Compétitions</p>
-            <p className="text-4xl font-semibold text-white">{competitionsCount}</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-violet-200">Athlètes inscrits</p>
-            <p className="text-4xl font-semibold text-white">{athleteCount}</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Résultats publiés</p>
-            <p className="text-4xl font-semibold text-white">{resultsCount}</p>
-          </div>
-        </div>
-      </div>
+        <motion.div 
+          className="grid gap-6 md:grid-cols-3 lg:grid-cols-1"
+          variants={itemVariants}
+        >
+          <StatsCard 
+            label="Compétitions" 
+            value={competitionsCount} 
+            color="border-cyan-500/30 text-cyan-400" 
+            idx={0}
+          />
+          <StatsCard 
+            label="Athlètes Inscrits" 
+            value={athleteCount} 
+            color="border-violet-500/30 text-violet-400" 
+            idx={1}
+          />
+          <StatsCard 
+            label="Résultats Publiés" 
+            value={resultsCount} 
+            color="border-emerald-500/30 text-emerald-400" 
+            idx={2}
+          />
+        </motion.div>
+      </motion.div>
     </section>
   );
+}
+
+function StatsCard({ label, value, color, idx }: { label: string, value: string, color: string, idx: number }) {
+    return (
+        <motion.div 
+          whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.08)" }}
+          className={`group rounded-2xl border bg-white/5 p-6 backdrop-blur-md transition-colors ${color}`}
+        >
+          <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-xs uppercase tracking-[0.2em] font-semibold opacity-80 ${color.split(' ')[1]}`}>{label}</p>
+                <p className="mt-2 text-4xl font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all">
+                    {value}
+                </p>
+              </div>
+              {/* Optional Icon could go here */}
+          </div>
+        </motion.div>
+    )
 }
 
