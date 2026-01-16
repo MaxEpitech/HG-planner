@@ -30,6 +30,11 @@ export async function getPublicCompetitions() {
       },
     });
 
+    console.log(`[getPublicCompetitions] Found ${competitions.length} competitions with status open/published`);
+    if (competitions.length > 0) {
+      console.log(`[getPublicCompetitions] First ID: ${competitions[0].id}, Status: ${competitions[0].status}`);
+    }
+
     return { success: true, data: competitions };
   } catch (error) {
     if (error instanceof Error) {

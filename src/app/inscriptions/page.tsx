@@ -9,7 +9,9 @@ export const metadata = {
 };
 
 export default async function InscriptionsPage() {
+  console.log("[InscriptionsPage] Rendering...");
   const result = await getPublicCompetitions();
+  console.log(`[InscriptionsPage] Result success: ${result.success}, Count: ${result.data?.length}`);
   const competitions = result.success ? result.data || [] : [];
 
   return (
