@@ -9,6 +9,10 @@ if (!connectionString) {
   throw new Error("DATABASE_URL manquant pour initialiser Prisma.");
 }
 
+// DEBUG: Log the connection string (masked)
+const maskedUrl = connectionString.replace(/:([^:@]+)@/, ":****@");
+console.log(`[lib/prisma] Initializing Prisma with URL: ${maskedUrl}`);
+
 const adapter = new PrismaPg({
   connectionString,
 });
