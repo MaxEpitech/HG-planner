@@ -1,30 +1,14 @@
 import Link from "next/link";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { getTranslations, getFormatter } from "next-intl/server";
 import { getDashboardStats } from "@/app/actions/dashboard";
 import { getCompetitions } from "@/app/actions/competitions";
 
-export const metadata = {
-  title: "Tableau de bord - Highland Games Luzarches",
-  description: "Gérez vos compétitions, inscriptions et résultats",
-};
-
-function formatDate(date: Date) {
-  try {
-    return format(new Date(date), "d MMMM yyyy", { locale: fr });
-  } catch {
-    return new Date(date).toLocaleDateString("fr-FR");
-  }
-}
-
-function getStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    draft: "Brouillon",
-    open: "Ouverte",
-    published: "Publiée",
-    closed: "Fermée",
+export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+  const t = await getTranslations({ locale, namespace: 'AdminDashboard' });
+  return {
+    title: `${t('heroDashboard')} - Highland Games Luzarches`,
+    description: t('heroNoCompDesc'),
   };
-  return labels[status] || status;
 }
 
 function getStatusColor(status: string) {
@@ -38,6 +22,8 @@ function getStatusColor(status: string) {
 }
 
 export default async function AdminDashboardPage() {
+  const t = await getTranslations('AdminDashboard');
+  const format = await getFormatter();
   const statsResult = await getDashboardStats();
   const competitionsResult = await getCompetitions();
 
@@ -45,9 +31,9 @@ export default async function AdminDashboardPage() {
     return (
       <div className="space-y-8">
         <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-red-300">
-          <p className="font-semibold">Erreur de chargement</p>
+          <p className="font-semibold">{t('errorLoad')}</p>
           <p className="mt-2 text-sm">
-            {statsResult.error || competitionsResult.error || "Une erreur est survenue"}
+            {statsResult.error || competitionsResult.error || t('errorGeneric')}
           </p>
         </div>
       </div>
@@ -67,31 +53,41 @@ export default async function AdminDashboardPage() {
 
   const nextSteps = [
     {
-      title: "Configurer les groupes",
+      title: t('stepGroupsTitle'),
       description: needsGroups
-        ? "Ajoutez des groupes à vos compétitions"
-        : "Tous les groupes sont configurés",
+        ? t('stepGroupsDescNeeded')
+        : t('stepGroupsDescDone'),
       href: "/admin/competitions",
       urgent: needsGroups,
     },
     {
-      title: "Valider les inscriptions",
+      title: t('stepRegistrationsTitle'),
       description:
         stats.pendingRegistrations > 0
-          ? `${stats.pendingRegistrations} inscription${stats.pendingRegistrations > 1 ? "s" : ""} en attente`
-          : "Aucune inscription en attente",
+          ? t('stepRegistrationsDescPending', { count: stats.pendingRegistrations, s: stats.pendingRegistrations > 1 ? "s" : "" })
+          : t('stepRegistrationsDescNone'),
       href: "/admin/athletes",
       urgent: stats.pendingRegistrations > 0,
     },
     {
-      title: "Saisir les résultats",
+      title: t('stepResultsTitle'),
       description: needsResults
-        ? "Des résultats sont à enregistrer"
-        : "Tous les résultats sont saisis",
+        ? t('stepResultsDescNeeded')
+        : t('stepResultsDescDone'),
       href: "/admin/resultats",
       urgent: needsResults,
     },
   ];
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "draft": return t('statusDraft');
+      case "open": return t('statusOpen');
+      case "published": return t('statusPublished');
+      case "closed": return t('statusClosed');
+      default: return status;
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -106,7 +102,7 @@ export default async function AdminDashboardPage() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-4">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">
-                  Prochaine compétition
+                  {t('heroNextComp')}
                 </span>
                 <h1 className="text-4xl font-semibold">{stats.nextCompetition.name}</h1>
                 <div className="space-y-2 text-slate-300">
@@ -116,17 +112,15 @@ export default async function AdminDashboardPage() {
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="text-emerald-400">📅</span>
-                    {formatDate(stats.nextCompetition.startDate)}
+                    {format.dateTime(stats.nextCompetition.startDate, { day: 'numeric', month: 'long', year: 'numeric' })}
                     {stats.nextCompetition.startDate.getTime() !==
                       stats.nextCompetition.endDate.getTime() && (
-                      <> - {formatDate(stats.nextCompetition.endDate)}</>
+                      <> - {format.dateTime(stats.nextCompetition.endDate, { day: 'numeric', month: 'long', year: 'numeric' })}</>
                     )}
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="text-emerald-400">👥</span>
-                    {stats.nextCompetition.groupsCount} groupe
-                    {stats.nextCompetition.groupsCount > 1 ? "s" : ""} configuré
-                    {stats.nextCompetition.groupsCount > 1 ? "s" : ""}
+                    {stats.nextCompetition.groupsCount} {t('heroGroupsConfigured', { s: stats.nextCompetition.groupsCount > 1 ? "s" : "" })}
                   </p>
                 </div>
               </div>
@@ -135,13 +129,13 @@ export default async function AdminDashboardPage() {
                   href={`/admin/competitions/${stats.nextCompetition.id}`}
                   className="rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-emerald-300"
                 >
-                  Gérer la compétition
+                  {t('btnManage')}
                 </Link>
                 <Link
                   href="/admin/resultats"
                   className="rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
-                  Saisir les résultats
+                  {t('btnResults')}
                 </Link>
               </div>
             </div>
@@ -155,17 +149,17 @@ export default async function AdminDashboardPage() {
           <div className="relative mx-auto max-w-6xl px-8 py-12">
             <div className="space-y-4">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">
-                Tableau de bord
+                {t('heroDashboard')}
               </span>
-              <h1 className="text-4xl font-semibold">Aucune compétition à venir</h1>
+              <h1 className="text-4xl font-semibold">{t('heroNoCompTitle')}</h1>
               <p className="text-slate-300">
-                Créez votre première compétition pour commencer à gérer vos événements.
+                {t('heroNoCompDesc')}
               </p>
               <Link
                 href="/admin/competitions"
                 className="inline-block rounded-full bg-emerald-400 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-emerald-300"
               >
-                Créer une compétition
+                {t('btnCreate')}
               </Link>
             </div>
           </div>
@@ -176,45 +170,45 @@ export default async function AdminDashboardPage() {
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:backdrop-blur">
           <p className="text-xs uppercase tracking-[0.3em] text-cyan-600 dark:text-cyan-200">
-            Compétitions actives
+            {t('kpiActiveComps')}
           </p>
           <p className="mt-2 text-4xl font-semibold text-zinc-900 dark:text-white">
             {stats.activeCompetitions}
           </p>
           <p className="mt-1 text-sm text-zinc-500 dark:text-slate-300">
-            {competitions.length} au total
+            {t('kpiTotal', { count: competitions.length })}
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:backdrop-blur">
           <p className="text-xs uppercase tracking-[0.3em] text-violet-600 dark:text-violet-200">
-            Inscriptions en attente
+            {t('kpiPendingRegs')}
           </p>
           <p className="mt-2 text-4xl font-semibold text-zinc-900 dark:text-white">
             {stats.pendingRegistrations}
           </p>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-slate-300">à valider</p>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-slate-300">{t('kpiToValidate')}</p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:backdrop-blur">
           <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-200">
-            Athlètes inscrits
+            {t('kpiTotalAthletes')}
           </p>
           <p className="mt-2 text-4xl font-semibold text-zinc-900 dark:text-white">
             {stats.totalRegistrations}
           </p>
           <p className="mt-1 text-sm text-zinc-500 dark:text-slate-300">
             {stats.availableSpots > 0
-              ? `${stats.availableSpots} place${stats.availableSpots > 1 ? "s" : ""} disponible${stats.availableSpots > 1 ? "s" : ""}`
-              : "Complet"}
+              ? t('kpiSpotsAvailable', { count: stats.availableSpots, s: stats.availableSpots > 1 ? "s" : "" })
+              : t('kpiFull')}
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 dark:backdrop-blur">
           <p className="text-xs uppercase tracking-[0.3em] text-amber-600 dark:text-amber-200">
-            Résultats publiés
+            {t('kpiResultsPublished')}
           </p>
           <p className="mt-2 text-4xl font-semibold text-zinc-900 dark:text-white">
             {stats.totalResults}
           </p>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-slate-300">enregistrés</p>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-slate-300">{t('kpiRecorded')}</p>
         </div>
       </section>
 
@@ -222,23 +216,23 @@ export default async function AdminDashboardPage() {
       <section className="space-y-4">
         <div>
           <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Vos compétitions
+            {t('sectionCompsTitle')}
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Gérez vos événements, groupes et inscriptions
+            {t('sectionCompsDesc')}
           </p>
         </div>
         {competitions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-zinc-300 bg-white/40 p-12 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
-            <p className="text-lg font-semibold">Aucune compétition</p>
+            <p className="text-lg font-semibold">{t('emptyCompsTitle')}</p>
             <p className="mt-2 text-sm text-zinc-500">
-              Créez votre première compétition pour commencer
+              {t('emptyCompsDesc')}
             </p>
             <Link
               href="/admin/competitions"
               className="mt-4 inline-block rounded-full bg-emerald-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
-              Créer une compétition
+              {t('btnCreate')}
             </Link>
           </div>
         ) : (
@@ -256,22 +250,15 @@ export default async function AdminDashboardPage() {
                     </h3>
                     <p className="mt-1 text-sm text-zinc-500">{competition.location}</p>
                     <p className="mt-2 text-xs text-zinc-400">
-                      {formatDate(competition.startDate)}
+                      {format.dateTime(competition.startDate, { day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                     <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">
-                      <span>{competition._count.groups} groupe{competition._count.groups > 1 ? "s" : ""}</span>
+                      <span>{t('compGroups', { count: competition._count.groups, s: competition._count.groups > 1 ? "s" : "" })}</span>
                       <span>
-                        {competition.groups.reduce(
-                          (sum, g) => sum + g._count.registrations,
-                          0
-                        )}{" "}
-                        inscription
-                        {competition.groups.reduce(
-                          (sum, g) => sum + g._count.registrations,
-                          0
-                        ) !== 1
-                          ? "s"
-                          : ""}
+                        {t('compRegistrations', {
+                          count: competition.groups.reduce((sum, g) => sum + g._count.registrations, 0),
+                          s: competition.groups.reduce((sum, g) => sum + g._count.registrations, 0) !== 1 ? "s" : ""
+                        })}
                       </span>
                     </div>
                   </div>
@@ -291,7 +278,7 @@ export default async function AdminDashboardPage() {
               href="/admin/competitions"
               className="inline-block rounded-full border border-zinc-300 px-6 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
             >
-              Voir toutes les compétitions ({competitions.length})
+              {t('btnSeeAll', { count: competitions.length })}
             </Link>
           </div>
         )}
@@ -301,10 +288,10 @@ export default async function AdminDashboardPage() {
       <section className="space-y-4">
         <div>
           <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Actions prioritaires
+            {t('sectionActionsTitle')}
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Les prochaines étapes pour vos compétitions
+            {t('sectionActionsDesc')}
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">

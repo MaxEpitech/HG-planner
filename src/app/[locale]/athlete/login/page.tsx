@@ -1,49 +1,26 @@
-"use client";
+import { useTranslations } from "next-intl";
 
-import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { TopNav } from "@/components/public/top-nav";
-import { PublicPageHero } from "@/components/public/page-hero";
+// ...
 
-export default function AdminLoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+export default function AthleteLoginPage() {
+  const t = useTranslations('Auth');
+  // ...
 
       if (result?.error) {
-        setError("Email ou mot de passe incorrect");
+        setError(t('errorIncorrect'));
       } else {
-        const sessionResponse = await fetch("/api/auth/session");
-        const session = await sessionResponse.json();
-        const role = session?.user?.role;
-
+        // ...
         if (role === "ATHLETE") {
-          setError("Ce compte est un compte athlète. Utilisez la page de connexion athlète.");
-        } else {
-          router.push("/admin");
+          router.push("/athlete");
           router.refresh();
+        } else {
+          setError(t('errorNotAthleteAccount'));
         }
       }
     } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      setError(t('errorGeneric'));
     } finally {
-      setLoading(false);
+      // ...
     }
   };
 
@@ -52,12 +29,12 @@ export default function AdminLoginPage() {
       <TopNav />
       <main className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12">
         <PublicPageHero
-          badge="Espace administrateur"
-          title="Connexion administrateur/organisateur"
-          description="Accédez à votre espace pour gérer vos compétitions, inscriptions et résultats."
+          badge={t('athleteBadge')}
+          title={t('athleteLoginTitle')}
+          description={t('athleteLoginDesc')}
           actions={[
-            { label: "Créer un compte organisateur", href: "/admin/inscription", variant: "secondary" },
-            { label: "Connexion athlète", href: "/athlete/login" },
+            { label: t('createAccount'), href: "/athlete/inscription", variant: "secondary" },
+            { label: t('competitionCalendar'), href: "/calendrier" },
           ]}
         />
 
@@ -65,15 +42,15 @@ export default function AdminLoginPage() {
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">
-                Authentification
+                {t('athleteConnection')}
               </p>
-              <h2 className="text-2xl font-semibold">Identifiants de connexion</h2>
+              <h2 className="text-2xl font-semibold">{t('loginIdentifiers')}</h2>
             </div>
             <Link
-              href="/admin/inscription"
+              href="/athlete/inscription"
               className="text-sm font-semibold text-emerald-300 underline-offset-4 hover:underline"
             >
-              Pas encore de compte ? Inscrivez-vous →
+              {t('noAccount')}
             </Link>
           </div>
 
@@ -90,7 +67,7 @@ export default function AdminLoginPage() {
                   htmlFor="email"
                   className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400"
                 >
-                  Email <span className="text-emerald-300">*</span>
+                  {t('email')} <span className="text-emerald-300">*</span>
                 </label>
                 <input
                   id="email"
@@ -98,7 +75,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="votre@email.com"
+                  placeholder={t('placeholderEmail')}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
                 />
               </div>
@@ -108,7 +85,7 @@ export default function AdminLoginPage() {
                   htmlFor="password"
                   className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400"
                 >
-                  Mot de passe <span className="text-emerald-300">*</span>
+                  {t('password')} <span className="text-emerald-300">*</span>
                 </label>
                 <input
                   id="password"
@@ -116,7 +93,7 @@ export default function AdminLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('placeholderPassword')}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
                 />
               </div>
@@ -128,7 +105,7 @@ export default function AdminLoginPage() {
                 disabled={loading}
                 className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? "Connexion..." : "Se connecter"}
+                {loading ? t('loggingIn') : t('loginButton')}
               </button>
             </div>
           </form>
@@ -137,3 +114,4 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+

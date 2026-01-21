@@ -204,3 +204,18 @@ model PersonalRecord {
   @@index([athleteId])
 }
 
+model OfficialRecord {
+  id          String   @id @default(cuid())
+  eventName   String
+  category    String   // "Open A", "Masters", "Femmes"
+  scope       String   // "Europe", "France", "Belgique", "Hollande", "Allemagne", "Suisse"
+  performance String
+  athleteName String
+  date        DateTime?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([eventName, category, scope])
+}
+

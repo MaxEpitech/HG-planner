@@ -1,25 +1,36 @@
 "use client";
 
-import Link from "next/link";
+import {useTranslations} from 'next-intl';
+import {Link} from '@/i18n/routing';
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { GlobalRole } from "@prisma/client";
+import Image from "next/image";
 
-const links = [
-  { href: "/", label: "Accueil" },
-  { href: "/calendrier", label: "Calendrier" },
-  { href: "/resultats", label: "Résultats" },
-];
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export function TopNav() {
+  const t = useTranslations('Navigation');
   const pathname = usePathname();
   const { data: session } = useSession();
+
+  const links = [
+    { href: "/", label: t('home') },
+    { href: "/calendrier", label: t('calendar') },
+    { href: "/resultats", label: t('results') },
+  ];
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur bg-white/80 dark:bg-zinc-950/80 border-b border-white/40">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <Link href="/" className="text-sm font-semibold tracking-[0.4em] uppercase text-emerald-600">
-          HG EUROPE
+        <Link href="/" className="flex items-center">
+          <Image 
+            src="/hg_europe.png" 
+            alt="Highland Games Europe" 
+            width={48} 
+            height={48}
+            className="h-12 w-auto"
+          />
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-600 dark:text-zinc-300">
           {links.map((link) => (
@@ -35,31 +46,32 @@ export function TopNav() {
           ))}
         </nav>
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           {!session ? (
             <>
               <Link
                 href="/athlete/inscription"
                 className="hidden sm:inline-block rounded-full border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
               >
-                Créer un compte athlète
+                {t('createAthleteAccount')}
               </Link>
               <Link
                 href="/athlete/login"
                 className="hidden sm:inline-block rounded-full border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
               >
-                Connexion athlète
+                {t('athleteLogin')}
               </Link>
               <Link
                 href="/admin/inscription"
                 className="hidden sm:inline-block rounded-full border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
               >
-                Devenir organisateur
+                {t('becomeOrganizer')}
               </Link>
               <Link
                 href="/login"
                 className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500"
               >
-                Connexion organisateur
+                {t('organizerLogin')}
               </Link>
             </>
           ) : session.user.role === GlobalRole.ATHLETE ? (
@@ -67,14 +79,14 @@ export function TopNav() {
               href="/athlete"
               className="rounded-full border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
             >
-              Mon espace
+              {t('mySpace')}
             </Link>
           ) : (
             <Link
               href="/admin"
               className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500"
             >
-              Espace organisateur
+              {t('organizerSpace')}
             </Link>
           )}
         </div>
@@ -82,4 +94,3 @@ export function TopNav() {
     </header>
   );
 }
-

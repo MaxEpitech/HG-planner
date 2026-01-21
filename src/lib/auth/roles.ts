@@ -31,7 +31,13 @@ export const GLOBAL_ROLES_WITH_LABELS = [
 ];
 
 export const canManageCompetition = (role: GlobalRole) =>
-  role === "PLATFORM_ADMIN" || role === "ORGANISATEUR";
+  role === "PLATFORM_ADMIN" || role === "ORGANISATEUR" || role === "DIRECTEUR_ATHLETIQUE";
+
+export const canAccessAdminPanel = (role: GlobalRole) =>
+  role === "PLATFORM_ADMIN" || role === "ORGANISATEUR" || role === "DIRECTEUR_ATHLETIQUE";
+
+export const canManageOfficialRecords = (role: GlobalRole) =>
+  role === "PLATFORM_ADMIN";
 
 export const canRecordResults = (role: GlobalRole | CompetitionRole) =>
   role === "PLATFORM_ADMIN" || role === "ORGANISATEUR" || role === "DIRECTEUR_ATHLETIQUE";

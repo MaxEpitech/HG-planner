@@ -229,10 +229,12 @@ export async function getAthleteResults() {
       (acc, result) => {
         const compId = result.event.group.competitionId;
         const compName = result.event.group.competition.name;
+        const compDate = result.event.group.competition.startDate;
         if (!acc[compId]) {
           acc[compId] = {
             competitionId: compId,
             competitionName: compName,
+            competitionDate: compDate,
             results: [],
           };
         }
@@ -244,6 +246,7 @@ export async function getAthleteResults() {
         {
           competitionId: string;
           competitionName: string;
+          competitionDate: Date;
           results: typeof results;
         }
       >

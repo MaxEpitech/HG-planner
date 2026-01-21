@@ -1,9 +1,9 @@
-import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/routing";
 import { headers } from "next/headers";
 import { AdminShell } from "@/components/layout/admin-shell";
 import { getCurrentUser } from "@/lib/auth/session";
-import { GLOBAL_ROLES_WITH_LABELS } from "@/lib/auth/roles";
+import { GLOBAL_ROLES_WITH_LABELS, canAccessAdminPanel } from "@/lib/auth/roles";
+import type { ReactNode } from "react";
 
 export default async function AdminLayout({
   children,
@@ -23,6 +23,11 @@ export default async function AdminLayout({
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Security: Block athletes from accessing admin area
+  if (!canAccessAdminPanel(user.role)) {
+    redirect("/athlete"); 
   }
 
   const activeRole = GLOBAL_ROLES_WITH_LABELS.find((r) => r.value === user.role);

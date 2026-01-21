@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import type { GlobalRole } from "@prisma/client";
+import Image from "next/image";
 
 type AdminShellProps = {
   role: { value: GlobalRole; label: string };
@@ -12,6 +13,8 @@ type AdminShellProps = {
 
 const baseLinks = [
   { href: "/admin", label: "Tableau de bord" },
+  { href: "/admin/analytics", label: "Analytics 📊" },
+  { href: "/admin/records", label: "Records 🏆" }, // New link
   { href: "/admin/competitions", label: "Compétitions" },
   { href: "/admin/athletes", label: "Athlètes" },
   { href: "/admin/resultats", label: "Résultats" },
@@ -27,7 +30,16 @@ export function AdminShell({ children, role }: AdminShellProps) {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:flex-row">
         <aside className="lg:w-64">
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+            <div className="flex items-center justify-center mb-4">
+              <Image 
+                src="/hg_europe.png" 
+                alt="Highland Games Europe" 
+                width={64} 
+                height={64}
+                className="h-16 w-auto"
+              />
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600 text-center">
               Admin Highland Games
             </p>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -44,7 +56,12 @@ export function AdminShell({ children, role }: AdminShellProps) {
             </button>
           </div>
           <nav className="mt-4 space-y-1">
-            {baseLinks.map((link) => (
+            {baseLinks
+              .filter(link => {
+                if (link.label.includes("Records")) return role.value === "PLATFORM_ADMIN";
+                return true;
+              })
+              .map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

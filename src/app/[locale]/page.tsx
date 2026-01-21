@@ -9,6 +9,8 @@ import { getPublicCompetitions } from "@/app/actions/registrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+import { Footer } from "@/components/public/footer";
+
 const athleteFeatures = [
   {
     title: "Parcours d'inscription clair",
@@ -148,6 +150,7 @@ export default async function Home() {
             </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
