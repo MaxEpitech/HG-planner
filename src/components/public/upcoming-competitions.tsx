@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { fr, enGB, nl } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslations, useLocale } from "next-intl";
 
 type UpcomingCompetition = {
   id: string;
@@ -23,20 +24,25 @@ type UpcomingCompetitionsSectionProps = {
 export function UpcomingCompetitionsSection({
   competitions,
 }: UpcomingCompetitionsSectionProps) {
+  const t = useTranslations("Home");
+  const locale = useLocale();
+
+  const dateLocale = locale === 'fr' ? fr : locale === 'nl' ? nl : enGB;
+
   return (
     <section className="mt-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-600 font-bold mb-1">
-            Calendrier
+            {t("calendarBadge")}
           </p>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Prochaines compétitions
+            {t("upcomingTitle")}
           </h2>
         </div>
         <Button variant="link" asChild className="hidden sm:inline-flex text-emerald-600">
           <Link href="/calendrier">
-            Voir tout le calendrier →
+            {t("viewCalendar")}
           </Link>
         </Button>
       </div>
@@ -44,7 +50,7 @@ export function UpcomingCompetitionsSection({
       {competitions.length === 0 ? (
         <Card className="p-8 text-center bg-slate-50 dark:bg-slate-900/50 border-dashed">
           <p className="text-sm text-muted-foreground">
-            Aucun événement à venir pour le moment. Revenez bientôt !
+            {t("noUpcomingEvents")}
           </p>
         </Card>
               ) : (
@@ -68,23 +74,23 @@ export function UpcomingCompetitionsSection({
                   <CardContent className="p-6 flex flex-col h-full">
                     <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
                         <span className="inline-block rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-semibold uppercase text-slate-600 dark:text-slate-400">
-                            {format(competition.startDate, "d MMM yyyy", { locale: fr })}
+                            {format(competition.startDate, "d MMM yyyy", { locale: dateLocale })}
                         </span>
                         
                         {/* Status Badges */}
                         {isLimitedSpots && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-xs font-bold text-amber-600 dark:text-amber-400 animate-pulse">
-                            🔥 {competition.remainingSpots} places
+                            🔥 {competition.remainingSpots} {t("badgeLimited")}
                           </span>
                         )}
                         {isSoldOut && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 text-xs font-bold text-rose-600 dark:text-rose-400">
-                            ⚠️ Complet
+                            ⚠️ {t("badgeFull")}
                           </span>
                         )}
                         {isNewCompetition && !isLimitedSpots && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                            ⭐ Nouveau
+                            ⭐ {t("badgeNew")}
                           </span>
                         )}
                     </div>
@@ -102,10 +108,10 @@ export function UpcomingCompetitionsSection({
                     <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
                         <div className="flex items-center justify-between font-medium text-sm mb-2">
                             <span className={competition.remainingSpots > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600"}>
-                                {competition.remainingSpots > 0 ? `${competition.remainingSpots} places` : "Complet"}
+                                {competition.remainingSpots > 0 ? `${competition.remainingSpots} ${t("badgeLimited")}` : t("badgeFull")}
                             </span>
                             <span className="text-muted-foreground text-xs">
-                                Sur {competition.totalSpots}
+                                {t("onTotal")} {competition.totalSpots}
                             </span>
                         </div>
                         
@@ -119,7 +125,7 @@ export function UpcomingCompetitionsSection({
                         
                         <Button asChild className="w-full mt-1 bg-slate-900 hover:bg-emerald-600 dark:bg-white dark:text-slate-900 dark:hover:bg-emerald-400 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-emerald-500/20" size="sm">
                             <Link href={`/inscriptions/${competition.id}`}>
-                                S&apos;inscrire
+                                {t("registerAction")}
                             </Link>
                         </Button>
                     </div>
@@ -134,7 +140,7 @@ export function UpcomingCompetitionsSection({
       <div className="mt-6 text-center sm:hidden">
          <Button variant="link" asChild className="text-emerald-600">
           <Link href="/calendrier">
-            Voir tout le calendrier →
+            {t("viewCalendar")}
           </Link>
         </Button>
       </div>

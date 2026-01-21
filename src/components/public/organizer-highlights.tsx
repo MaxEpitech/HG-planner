@@ -1,25 +1,31 @@
-const highlights = [
-  {
-    title: "Tableau de bord temps réel",
-    description: "Capacité, inscriptions, résultats : tout est synchronisé automatiquement.",
-  },
-  {
-    title: "Saisie guidée des scores",
-    description: "Classement glisser-déposer, calcul des points inversés instantané.",
-  },
-  {
-    title: "Gestion simplifiée des rôles",
-    description: "Invitez organisateurs, directeurs athlétiques et arbitres en un clic.",
-  },
-];
+"use client";
+
+import { useTranslations } from "next-intl";
 
 export function OrganizerHighlights() {
+  const t = useTranslations("Home");
+
+  const highlights = [
+    {
+      title: t("high1Title"),
+      description: t("high1Desc"),
+    },
+    {
+      title: t("high2Title"),
+      description: t("high2Desc"),
+    },
+    {
+      title: t("high3Title"),
+      description: t("high3Desc"),
+    },
+  ];
+
   return (
     <section className="mt-6 rounded-[32px] border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
       <p className="text-xs uppercase tracking-[0.3em] text-emerald-600">
-        Organisateurs
+        {t("organizersBadge")}
       </p>
-      <h2 className="mt-2 text-2xl font-semibold">Les outils dont vous avez besoin</h2>
+      <h2 className="mt-2 text-2xl font-semibold">{t("organizersTitle")}</h2>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         {highlights.map((highlight) => (
           <div

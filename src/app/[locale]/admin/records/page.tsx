@@ -5,6 +5,7 @@ import { getOfficialRecords, deleteOfficialRecord, createOfficialRecord } from "
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { highlandGamesEvents } from "@/lib/data/highland-games-events";
 
 type OfficialRecord = {
   id: string;
@@ -117,14 +118,24 @@ export default function AdminRecordsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-slate-800 p-6 rounded-xl border border-white/10 mb-6"
         >
+
+
           <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <input 
-              placeholder="Épreuve (ex: Pierre)" 
-              required
-              className="bg-slate-950 border border-white/10 rounded px-3 py-2 text-white"
-              value={formData.eventName}
-              onChange={e => setFormData({...formData, eventName: e.target.value})}
-            />
+            <div className="flex flex-col gap-1">
+              <select
+                required
+                className="bg-slate-950 border border-white/10 rounded px-3 py-2 text-white"
+                value={formData.eventName}
+                onChange={e => setFormData({...formData, eventName: e.target.value})}
+              >
+                <option value="">Sélectionnez une épreuve</option>
+                {highlandGamesEvents.map((event) => (
+                  <option key={event.name} value={event.name}>
+                    {event.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <input 
               placeholder="Catégorie (ex: Open A)" 
               required

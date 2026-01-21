@@ -3,9 +3,31 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+import { cookies } from "next/headers";
+
+const FEDERATION_SCOPE_MAP: Record<string, string[]> = {
+    FR: ["France", "Europe"],
+    NL: ["Hollande", "Pays-Bas", "Europe"],
+    BE: ["Belgique", "Europe"],
+    DE: ["Allemagne", "Europe"],
+    CH: ["Suisse", "Europe"],
+    // EU implies all, or at least Europe. If EU, we might want to show ALL records from all countries?
+    // Or just "Europe" official records? 
+    // User said "pour la france ... ranking visible sont seulement le ranking francais et europeen"
+    // Implies strict filtering.
+    // For EU context, let's show ALL for now (no filter).
+};
+
 export async function getOfficialRecords() {
     try {
+        const cookieStore = await cookies();
+        const federationContext = cookieStore.get("hg_federation_context")?.value || "EU";
+
+        const allowedScopes = FEDERATION_SCOPE_MAP[federationContext];
+        const whereClause = allowedScopes ? { scope: { in: allowedScopes } } : {};
+
         const records = await prisma.officialRecord.findMany({
+            where: whereClause,
             orderBy: [
                 { scope: "asc" },
                 { eventName: "asc" },

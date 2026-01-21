@@ -24,6 +24,21 @@ enum RegistrationStatus {
   CANCELLED
 }
 
+
+model Federation {
+  id          String   @id @default(cuid())
+  name        String   // Ex: "Fédération Française"
+  slug        String   @unique // Ex: "FR", "NL", "EU"
+  logo        String?
+  themeColor  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  competitions Competition[]
+  users        User[]
+  athletes     Athlete[]
+}
+
 model User {
   id               String                 @id @default(cuid())
   email            String                 @unique
@@ -35,6 +50,9 @@ model User {
   isApproved       Boolean                @default(false)
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
+  federationId     String?
+
+  federation       Federation?            @relation(fields: [federationId], references: [id])
   accounts         Account[]              @relation("UserAccounts")
   sessions         Session[]              @relation("UserSessions")
   competitions     Competition[]          @relation("CompetitionOwner")
@@ -54,7 +72,10 @@ model Competition {
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
   ownerId      String
+  federationId String?
+
   owner        User                    @relation("CompetitionOwner", fields: [ownerId], references: [id])
+  federation   Federation?             @relation(fields: [federationId], references: [id])
   groups       Group[]
   permissions  CompetitionPermission[]
 }
@@ -106,7 +127,7 @@ model Athlete {
   email        String?
   phone        String?
   birthDate    DateTime?
-  country      String?
+  country      String?       // Gardé pour legacy/display, mais federationId fera le tri officiel
   tshirtSize   String?
   gender       String?
   bio          String?
@@ -118,7 +139,9 @@ model Athlete {
   updatedAt    DateTime      @updatedAt
   coachId      String?
   userId       String?       @unique
+  federationId String?
 
+  federation      Federation?   @relation(fields: [federationId], references: [id])
   registrations   Registration[]
   results         Result[]
   personalRecords PersonalRecord[]

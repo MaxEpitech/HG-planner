@@ -1,15 +1,26 @@
 
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import * as XLSX from "xlsx";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+// Charger les variables d'environnement comme dans seed.ts
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 // Configuration
-const EXCEL_FILE_PATH = "athletes_data.xlsx"; // Nom du fichier attendu à la racine
+const EXCEL_FILE_PATH = "athletes_data.xlsx";
 
-// Initialisation Prisma
-const prisma = new PrismaClient();
+// Initialisation Prisma avec Adapter (comme dans seed.ts)
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+    throw new Error("DATABASE_URL manquant dans l'environnement");
+}
+
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 // Types pour le mapping Excel
 interface AthleteRow {
@@ -19,13 +30,28 @@ interface AthleteRow {
     Gender?: "M" | "F";
     Category?: string;
     Club?: string;
-    // Events (Performances en string ex: "10.50m")
-    Pierre?: string; // Stone Put
-    PoidsLongueur?: string; // Weight for Distance
-    PoidsHauteur?: string; // Weight for Height
-    Marteau?: string; // Hammer
-    Caber?: string; // Caber Toss
+    [key: string]: string | undefined; // Allow dynamic event columns
 }
+
+// Liste des épreuves supportées
+const KNOWN_EVENTS = [
+    "Pierre légere",
+    "Pierre lourde",
+    "Poids en longueur léger (6kg)",
+    "Poids en longueur lourd (12.7kg)",
+    "Poids en longueur léger (12.7kg)",
+    "Poids en longueur lourd (19.09kg)",
+    "Poids en longueur lourd (25.4kg)",
+    "Poids en hauteur (19.09kg)",
+    "Poids en hauteur (25.4kg)",
+    "Poids en hauteur (12.7kg)",
+    "Marteau leger (7.26kg)",
+    "Marteau lourd (10kg)",
+    "Marteau lourd (7.26kg)",
+    "Marteau leger (5kg)",
+    "Retourné de tronc",
+    "Lancer de gerbe"
+];
 
 async function main() {
     console.log("🚀 Lancement du script d'importation...");
@@ -34,7 +60,7 @@ async function main() {
 
     if (!fs.existsSync(filePath)) {
         console.error(`❌ Fichier non trouvé : ${filePath}`);
-        console.log("👉 Veuillez placer votre fichier Excel à la racine du projet nommé 'athletes_data.xlsx'.");
+        console.log(`👉 Veuillez placer votre fichier Excel à la racine du projet nommé '${EXCEL_FILE_PATH}'.`);
         process.exit(1);
     }
 
@@ -48,7 +74,6 @@ async function main() {
     console.log(`📊 ${data.length} lignes trouvées dans le fichier.`);
 
     let createdCount = 0;
-    let updatedCount = 0;
     let errorCount = 0;
 
     for (const row of data) {
@@ -63,7 +88,6 @@ async function main() {
             console.log(`👤 Traitement : ${row.FirstName} ${row.LastName}`);
 
             // 1. Créer ou récupérer le User
-            // On utilise un email généré si pas fourni pour pouvoir créer le compte
             const user = await prisma.user.upsert({
                 where: { email },
                 update: {},
@@ -72,7 +96,7 @@ async function main() {
                     firstName: row.FirstName,
                     lastName: row.LastName,
                     role: "ATHLETE",
-                    passwordHash: "$2a$12$eXampleHashPlaceHolder", // Mot de passe dummy, à reset
+                    passwordHash: "$2a$12$eXampleHashPlaceHolder",
                     isApproved: true,
                 },
             });
@@ -83,7 +107,6 @@ async function main() {
                 update: {
                     club: row.Club,
                     gender: row.Gender,
-                    // On ne met pas à jour le reste pour ne pas écraser les données existantes importantes
                 },
                 create: {
                     userId: user.id,
@@ -96,27 +119,17 @@ async function main() {
             });
 
             // 3. Ajouter les Records Personnels
-            const recordsToAdd = [
-                { name: "Pierre (Stone Put)", perf: row.Pierre },
-                { name: "Poids en Longueur", perf: row.PoidsLongueur },
-                { name: "Poids en Hauteur", perf: row.PoidsHauteur },
-                { name: "Marteau", perf: row.Marteau },
-                { name: "Retourné de Tronc", perf: row.Caber },
-            ];
+            for (const [key, value] of Object.entries(row)) {
+                const eventName = KNOWN_EVENTS.find(e => e.toLowerCase() === key.trim().toLowerCase());
 
-            for (const rec of recordsToAdd) {
-                if (rec.perf) {
-                    // Vérifier si ce record existe déjà pour éviter les doublons inutiles
-                    // Ici on simplifie en ajoutant toujours, ou on pourrait check l'existence
-                    // Pour l'import initial, on crée.
-
+                if (eventName && value) {
                     await prisma.personalRecord.create({
                         data: {
                             athleteId: athlete.id,
-                            eventName: rec.name,
-                            performance: String(rec.perf),
-                            date: new Date(), // Date d'import
-                            notes: "Import automatique Excel",
+                            eventName: eventName,
+                            performance: String(value),
+                            date: new Date(),
+                            notes: "Import Excel",
                         },
                     });
                 }

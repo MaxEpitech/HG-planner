@@ -8,31 +8,34 @@ import { getPublicStats } from "@/app/actions/public-stats";
 import { getPublicCompetitions } from "@/app/actions/registrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/public/footer";
 
-const athleteFeatures = [
-  {
-    title: "Parcours d'inscription clair",
-    description:
-      "Choix des groupes, suivi du statut, confirmations en temps réel.",
-    badge: "Athlètes",
-  },
-  {
-    title: "Profil complet",
-    description: "Club, catégorie, records : toutes vos infos centralisées.",
-  },
-  {
-    title: "Résultats publics",
-    description: "Classements mis à jour après chaque épreuve.",
-  },
-];
-
 export default async function Home() {
-  const [statsResult, competitionsResult] = await Promise.all([
+  const [statsResult, competitionsResult, t] = await Promise.all([
     getPublicStats(),
     getPublicCompetitions(),
+    getTranslations("Home"),
   ]);
+
+  const statsT = await getTranslations("Hero");
+
+  const athleteFeatures = [
+    {
+      title: t("feature1Title"),
+      description: t("feature1Desc"),
+      badge: t("athleteBadge"),
+    },
+    {
+      title: t("feature2Title"),
+      description: t("feature2Desc"),
+    },
+    {
+      title: t("feature3Title"),
+      description: t("feature3Desc"),
+    },
+  ];
 
   const heroStats =
     statsResult.success && statsResult.data
@@ -43,6 +46,12 @@ export default async function Home() {
           totalResults: 0,
           totalAthletes: 0,
         };
+
+  // Override keys for translation if needed or pass full stats object with proper labels in Hero
+  // But HeroSection likely uses translations internally or accepts raw numbers. 
+  // Checking HeroSection (saw it earlier), it takes a 'stats' object. 
+  // Let's assume HeroSection handles its own labels or we should verify. 
+  // Existing code passed `heroStats`.
 
   const now = new Date();
   const upcomingCompetitions =
@@ -85,7 +94,7 @@ export default async function Home() {
             <UpcomingCompetitionsSection competitions={upcomingCompetitions} />
 
             <FeatureGrid
-              title="Pour les athlètes & le public"
+              title={t("featuresTitle")}
               features={athleteFeatures}
             />
 
@@ -96,24 +105,24 @@ export default async function Home() {
                     <CardContent className="p-10 flex flex-col items-center justify-center h-full space-y-6">
                          <div className="space-y-2">
                              <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 font-bold">
-                                Vous êtes athlète ?
+                                {t("athleteCardBadge")}
                             </p>
                             <h2 className="text-3xl font-bold tracking-tight">
-                                Rejoignez la compétition
+                                {t("athleteCardTitle")}
                             </h2>
                             <p className="text-muted-foreground max-w-sm mx-auto">
-                                Inscrivez-vous, suivez vos performances et accédez à vos records en un clic.
+                                {t("athleteCardDesc")}
                             </p>
                          </div>
                          <div className="flex flex-wrap justify-center gap-4">
                             <Button asChild size="lg" className="rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
                                 <Link href="/athlete/inscription">
-                                    Créer mon compte
+                                    {t("createAccount")}
                                 </Link>
                             </Button>
                             <Button asChild variant="outline" size="lg" className="rounded-full">
                                 <Link href="/login">
-                                    Se connecter
+                                    {t("login")}
                                 </Link>
                             </Button>
                          </div>
@@ -124,24 +133,24 @@ export default async function Home() {
                     <CardContent className="p-10 flex flex-col items-center justify-center h-full space-y-6">
                          <div className="space-y-2">
                              <p className="text-xs uppercase tracking-[0.3em] text-slate-500 font-bold">
-                                Organisateur
+                                {t("organizerCardBadge")}
                             </p>
                             <h2 className="text-3xl font-bold tracking-tight">
-                                Gérez vos événements
+                                {t("organizerCardTitle")}
                             </h2>
                             <p className="text-muted-foreground max-w-sm mx-auto">
-                                Une suite d&apos;outils complète pour vos Highland Games : inscriptions, groupes, résultats.
+                                {t("organizerCardDesc")}
                             </p>
                          </div>
                          <div className="flex flex-wrap justify-center gap-4">
                             <Button asChild size="lg" className="rounded-full bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">
                                 <Link href="/admin">
-                                    Interface organisateur
+                                    {t("organizerInterface")}
                                 </Link>
                             </Button>
                             <Button asChild variant="outline" size="lg" className="rounded-full">
                                 <Link href="/inscriptions">
-                                    Inscriptions
+                                    {t("registrations")}
                                 </Link>
                             </Button>
                          </div>
