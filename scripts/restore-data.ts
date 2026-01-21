@@ -29,6 +29,13 @@ async function restore() {
         if (data.federations?.length) {
             console.log(`Restoring ${data.federations.length} Federations...`);
             for (const item of data.federations) {
+                // Check slug conflict
+                const existingBySlug = await prisma.federation.findUnique({ where: { slug: item.slug } });
+                if (existingBySlug && existingBySlug.id !== item.id) {
+                    console.log(`⚠️ Federation conflict (slug: ${item.slug}). Deleting existing ${existingBySlug.id}...`);
+                    await prisma.federation.delete({ where: { id: existingBySlug.id } });
+                }
+
                 await prisma.federation.upsert({
                     where: { id: item.id },
                     update: item,
@@ -41,9 +48,21 @@ async function restore() {
         if (data.users?.length) {
             console.log(`Restoring ${data.users.length} Users...`);
             for (const item of data.users) {
+                // Check email conflict
+                const existingByEmail = await prisma.user.findUnique({ where: { email: item.email } });
+                if (existingByEmail && existingByEmail.id !== item.id) {
+                    console.log(`⚠️ User conflict (email: ${item.email}). Deleting existing ${existingByEmail.id}...`);
+                    try {
+                        await prisma.user.delete({ where: { id: existingByEmail.id } });
+                    } catch (e) {
+                        console.error(`❌ Failed to delete user ${existingByEmail.id}. Please manually clean or verify dependencies.`);
+                        throw e;
+                    }
+                }
+
                 await prisma.user.upsert({
                     where: { id: item.id },
-                    update: item, // Be careful if passwords differ, but for migration it's usually what we want
+                    update: item,
                     create: item,
                 });
             }
