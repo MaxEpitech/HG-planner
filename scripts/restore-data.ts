@@ -17,6 +17,7 @@ const prisma = new PrismaClient({ adapter });
 // ID Mappings to handle Seed collisions
 const federationMap = new Map<string, string>(); // backupId -> realId
 const userMap = new Map<string, string>();       // backupId -> realId
+const athleteMap = new Map<string, string>();    // backupId -> realId
 
 // Helper to remap IDs in an object
 function remap<T>(item: T, mappings: { field: keyof T, map: Map<string, string> }[]): T {
@@ -100,7 +101,9 @@ async function restore() {
             console.log(`Restoring ${data.permissions.length} Permissions...`);
             for (const item of data.permissions) {
                 const mapped = remap(item, [{ field: 'userId', map: userMap }]);
-                // Competition IDs preserved (no mapping logic added for comps as collision unlikely)
+
+                // Also remap competitionId if we ever map competitions (not currently, but safe to check)
+
                 await prisma.competitionPermission.upsert({ where: { id: mapped.id }, update: mapped, create: mapped });
             }
         }
@@ -137,7 +140,11 @@ async function restore() {
                     if (mapped.userId) {
                         const existingAthlete = await prisma.athlete.findUnique({ where: { userId: mapped.userId } });
                         if (existingAthlete && existingAthlete.id !== mapped.id) {
-                            console.log(`   Athlete merged on User: ${mapped.firstName} ${mapped.lastName}`);
+                            console.log(`   Athlete merged on User: ${mapped.firstName} ${mapped.lastName} (${mapped.id} -> ${existingAthlete.id})`);
+
+                            // IMPORTANT: Add to ID map
+                            athleteMap.set(mapped.id, existingAthlete.id);
+
                             const { id, ...dataOfAthlete } = mapped;
                             await prisma.athlete.update({ where: { id: existingAthlete.id }, data: dataOfAthlete });
                             shouldCreate = false;
@@ -156,7 +163,8 @@ async function restore() {
         if (data.personalRecords?.length) {
             console.log(`Restoring ${data.personalRecords.length} Personal Records...`);
             for (const item of data.personalRecords) {
-                await prisma.personalRecord.upsert({ where: { id: item.id }, update: item, create: item });
+                const mapped = remap(item, [{ field: 'athleteId', map: athleteMap }]);
+                await prisma.personalRecord.upsert({ where: { id: mapped.id }, update: mapped, create: mapped });
             }
         }
 
@@ -164,7 +172,8 @@ async function restore() {
         if (data.registrations?.length) {
             console.log(`Restoring ${data.registrations.length} Registrations...`);
             for (const item of data.registrations) {
-                await prisma.registration.upsert({ where: { id: item.id }, update: item, create: item });
+                const mapped = remap(item, [{ field: 'athleteId', map: athleteMap }]);
+                await prisma.registration.upsert({ where: { id: mapped.id }, update: mapped, create: mapped });
             }
         }
 
@@ -172,7 +181,8 @@ async function restore() {
         if (data.results?.length) {
             console.log(`Restoring ${data.results.length} Results...`);
             for (const item of data.results) {
-                await prisma.result.upsert({ where: { id: item.id }, update: item, create: item });
+                const mapped = remap(item, [{ field: 'athleteId', map: athleteMap }]);
+                await prisma.result.upsert({ where: { id: mapped.id }, update: mapped, create: mapped });
             }
         }
 
