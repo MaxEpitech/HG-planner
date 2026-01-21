@@ -1,25 +1,43 @@
-import { useTranslations } from "next-intl";
+"use client";
 
-// ...
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/routing";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { TopNav } from "@/components/public/top-nav";
+import { PublicPageHero } from "@/components/public/page-hero";
 
 export default function AdminLoginPage() {
   const t = useTranslations('Auth');
-  // ...
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
       if (result?.error) {
         setError(t('errorIncorrect'));
       } else {
-        // ...
-        if (role === "ATHLETE") {
-          setError(t('errorAthleteAccount'));
-        } else {
-         // ...
-        }
+        // Redirection vers le dashboard admin
+        router.push("/admin");
+        router.refresh();
       }
-    } catch {
+    } catch (error) {
       setError(t('errorGeneric'));
     } finally {
-      // ...
+      setLoading(false);
     }
   };
 

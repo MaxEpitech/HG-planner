@@ -7,9 +7,12 @@ import type { ReactNode } from "react";
 
 export default async function AdminLayout({
   children,
+  params
 }: {
   children: ReactNode;
+  params: Promise<{locale: string}>;
 }) {
+  const { locale } = await params;
   // Vérifier si on est sur la page d'inscription (route publique)
   const headersList = await headers();
   const pathname = headersList.get("x-invoke-path") || "";
@@ -22,18 +25,21 @@ export default async function AdminLayout({
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login");
+    redirect({ href: "/login", locale });
+    return null;
   }
 
   // Security: Block athletes from accessing admin area
-  if (!canAccessAdminPanel(user.role)) {
-    redirect("/athlete"); 
+  if (!user || !canAccessAdminPanel(user.role)) {
+    redirect({ href: "/athlete", locale });
+    return null; 
   }
 
   const activeRole = GLOBAL_ROLES_WITH_LABELS.find((r) => r.value === user.role);
 
   if (!activeRole) {
-    redirect("/login");
+    redirect({ href: "/login", locale });
+    return null;
   }
 
   return <AdminShell role={activeRole}>{children}</AdminShell>;
