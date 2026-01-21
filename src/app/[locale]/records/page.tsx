@@ -13,6 +13,8 @@ export async function generateMetadata({params: {locale}}: {params: {locale: str
   };
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function PublicRecordsPage() {
   const [result, t] = await Promise.all([
     getOfficialRecords(),
