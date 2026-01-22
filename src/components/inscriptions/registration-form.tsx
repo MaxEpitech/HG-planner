@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import type { HTMLInputTypeAttribute, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 

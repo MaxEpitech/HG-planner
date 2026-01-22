@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { CreateCompetitionModal } from "./create-competition-modal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";

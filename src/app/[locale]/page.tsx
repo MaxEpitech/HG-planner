@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { HeroSection } from "@/components/public/hero-section";
 import { FeatureGrid } from "@/components/public/feature-grid";
 import { TopNav } from "@/components/public/top-nav";
@@ -12,10 +12,14 @@ import { getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/public/footer";
 
+import { RankingPreview } from "@/components/ranking/ranking-preview";
+import { getEuropeanRanking } from "@/app/actions/ranking";
+
 export default async function Home() {
-  const [statsResult, competitionsResult, t] = await Promise.all([
+  const [statsResult, competitionsResult, rankingResult, t] = await Promise.all([
     getPublicStats(),
     getPublicCompetitions(),
+    getEuropeanRanking(),
     getTranslations("Home"),
   ]);
 
@@ -46,12 +50,8 @@ export default async function Home() {
           totalResults: 0,
           totalAthletes: 0,
         };
-
-  // Override keys for translation if needed or pass full stats object with proper labels in Hero
-  // But HeroSection likely uses translations internally or accepts raw numbers. 
-  // Checking HeroSection (saw it earlier), it takes a 'stats' object. 
-  // Let's assume HeroSection handles its own labels or we should verify. 
-  // Existing code passed `heroStats`.
+  
+  const rankingAthletes = (rankingResult.success && rankingResult.data) ? rankingResult.data : [];
 
   const now = new Date();
   const upcomingCompetitions =
@@ -92,6 +92,8 @@ export default async function Home() {
 
         <div className="mx-auto flex flex-col gap-24 px-6 py-24 max-w-7xl">
             <UpcomingCompetitionsSection competitions={upcomingCompetitions} />
+
+            <RankingPreview athletes={rankingAthletes} />
 
             <FeatureGrid
               title={t("featuresTitle")}

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 
 import { TopNav } from "@/components/public/top-nav";
 import { PublicPageHero } from "@/components/public/page-hero";

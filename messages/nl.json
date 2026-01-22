@@ -91,7 +91,11 @@
         "high2Title": "Begeleide Score-invoer",
         "high2Desc": "Drag-and-drop rangschikking, directe omgekeerde puntenberekening.",
         "high3Title": "Vereenvoudigd Rollenbeheer",
-        "high3Desc": "Nodig organisatoren, sportdirecteurs en scheidsrechters uit met één klik."
+        "high3Desc": "Nodig organisatoren, sportdirecteurs en scheidsrechters uit met één klik.",
+        "rankingPreviewBadge": "Leaderboard",
+        "rankingPreviewTitle": "De Europese Elite",
+        "rankingPreviewDesc": "Ontdek de officiële ranglijst op basis van prestaties vergeleken met Europese records.",
+        "rankingPreviewAction": "Bekijk Volledige Ranglijst"
     },
     "Auth": {
         "adminBadge": "Beheerder Ruimte",

@@ -91,7 +91,11 @@
         "high2Title": "Saisie guidée des scores",
         "high2Desc": "Classement glisser-déposer, calcul des points inversés instantané.",
         "high3Title": "Gestion simplifiée des rôles",
-        "high3Desc": "Invitez organisateurs, directeurs athlétiques et arbitres en un clic."
+        "high3Desc": "Invitez organisateurs, directeurs athlétiques et arbitres en un clic.",
+        "rankingPreviewBadge": "Leaderboard",
+        "rankingPreviewTitle": "L'élite européenne",
+        "rankingPreviewDesc": "Découvrez le classement officiel basé sur les performances comparées aux records d'Europe.",
+        "rankingPreviewAction": "Voir le classement complet"
     },
     "Auth": {
         "adminBadge": "Espace administrateur",

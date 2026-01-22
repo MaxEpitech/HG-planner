@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { getTranslations, getFormatter } from "next-intl/server";
 import { getDashboardStats } from "@/app/actions/dashboard";
 import { getCompetitions } from "@/app/actions/competitions";

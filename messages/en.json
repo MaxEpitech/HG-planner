@@ -91,7 +91,11 @@
         "high2Title": "Guided Score Entry",
         "high2Desc": "Drag-and-drop ranking, instant reverse points calculation.",
         "high3Title": "Simplified Role Management",
-        "high3Desc": "Invite organizers, athletic directors, and referees in one click."
+        "high3Desc": "Invite organizers, athletic directors, and referees in one click.",
+        "rankingPreviewBadge": "Leaderboard",
+        "rankingPreviewTitle": "The European Elite",
+        "rankingPreviewDesc": "Discover the official ranking based on performances compared to European records.",
+        "rankingPreviewAction": "View Full Ranking"
     },
     "Auth": {
         "adminBadge": "Administrator Space",
